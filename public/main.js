@@ -1,5 +1,5 @@
 var keys = [];
-
+var UI;
 var tree = [ //
 	{
 		txt: 'Words words words words words words',
@@ -79,11 +79,26 @@ function setup() {
 	p5Instance.canvas.oncontextmenu = function(e) {
 		e.preventDefault();
 	};
+	UI = new UI_Controller(p5Instance);
+	var newElm = new UI_Element(UI, 200, 200, 50, 50, {
+		dragable: true,
+		clickable: true
+	});
+	newElm.spawnElement(new UI_Element(newElm, 0, 100, 50, 50, {
+		dragable: true,
+		clickable: true
+	}));
+	newElm.spawnElement(new UI_Element(newElm, 100, 0, 50, 50, {
+		dragable: true,
+		clickable: true
+	}));
+	UI.spawnElement(newElm);
 }
 
 function draw() {
 	background(0);
 	drawTree(windowWidth / 2, 50);
+	UI.run();
 }
 
 function keyPressed() {
@@ -94,8 +109,16 @@ function keyReleased() {
 	keys[keyCode] = false;
 }
 
-// function mousePressed() {}
-// function mouseDragged() {}
-// function mouseReleased() {}
+function mousePressed() {
+	UI.mouseDown();
+}
+
+function mouseDragged() {
+	UI.mouseDragged();
+}
+
+function mouseReleased() {
+	UI.mouseUp();
+}
 // function windowResized() {}
 // function mouseWheel(e) {}
