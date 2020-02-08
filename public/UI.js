@@ -20,6 +20,7 @@ function ID() {
 	}
 	return str;
 }
+
 class UI_Controller {
 	constructor(p5Insance) {
 		this.x = 0;
@@ -53,7 +54,6 @@ class UI_Controller {
 		p5Instance._pInst._onmouseup();
 	}
 }
-
 class UI_Element {
 	constructor(owner, x, y, w, h, opts) {
 		opts = opts || {};
@@ -69,6 +69,7 @@ class UI_Element {
 		this.h = h || 10;
 		this.dragable = opts.dragable || false;
 		this.clickable = opts.clickable || false;
+		this.visualElement = undefined;
 		this.id = ID();
 	}
 	move() {
@@ -83,6 +84,9 @@ class UI_Element {
 			stroke(255);
 		}
 		rect(this.absX, this.absY, this.w, this.h);
+		if (this.visualElement && typeof this.visualElement.run == 'function') {
+			this.visualElement.run();
+		}
 	}
 	run() {
 		this.move();
@@ -117,4 +121,41 @@ class UI_Element {
 			this.UI.activeElement = this;
 		}
 	}
+}
+class UI_Interactable {
+	constructor(owner, opts) {
+		this.owner = owner;
+		this.UI = owner.UI;
+		this.type = opts.type;
+		this.boundObj = opts.boundObj || window;
+		this.boundVar = opts.boundVar;
+		this.setVal = opts.setVal;
+		this.lable = opts.lable;
+		this.colorOpts = opts.colorOpts || [];
+		this.onValue = opts.onValue;
+		this.txt = opts.txt;
+		this.w = opts.w;
+		this.h = opts.h;
+	}
+	run() {
+		var col = this.colorOpts.find(c => c.setVal == this.boundObj[this.boundVar]);
+		if (btn(this.owner.absX, this.owner.absY, this.w, this.h, this.lable, col ? col.col : undefined)) {
+			if (this.type == 'confirm') {
+				this.UI.forceMouseUp();
+				var val = confirm(this.txt);
+				this.trySet(val);
+			}
+		}
+	}
+	trySet(val) {
+		if (this.boundObj && this.boundVar) {
+			this.boundObj[this.boundVar] = val;
+		}
+		if (typeof this.onValue == 'function') {
+			this.onValue(val);
+		}
+	}
+}
+class UI_Sidebar extends UI_Element {
+	constructor(data, side) {}
 }

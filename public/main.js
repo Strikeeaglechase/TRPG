@@ -1,5 +1,13 @@
 var keys = [];
 var UI;
+var mouseUp = true;
+var buttonSpacer = 10;
+const TEXT_SIZE = 12;
+const SIDEBAR_SIZE = 150;
+const SIDEBAR_BUFF = 25;
+const SIDE_BTN_WID = SIDEBAR_SIZE - SIDEBAR_BUFF;
+const SIDE_BTN_HEI = TEXT_SIZE + 3;
+const Y_SPACER = 15;
 var tree = [ //
 	{
 		txt: 'Words words words words words words',
@@ -55,11 +63,13 @@ function btn(x, y, w, h, txt, col) {
 	fill(col || 0);
 	rect(x, y, acW, h);
 	fill(255);
+	noStroke();
 	text(txt, x + 5, y + h / 2 + 4);
-	if (mouseX > x && mouseX < x + acW && mouseY > y && mouseY < y + h) {
+	if (mouseX > x && mouseX < x + acW && mouseY > y && mouseY < y + h && mouseUp) {
 		if (mouseIsPressed) {
 			fill(0, 255, 0, 100);
 			rect(x, y, acW, h);
+			mouseUp = false;
 			return true;
 		} else {
 			fill(0, 100);
@@ -79,25 +89,33 @@ function setup() {
 	p5Instance.canvas.oncontextmenu = function(e) {
 		e.preventDefault();
 	};
+	var sidebarData = ['noU', 'die', '1', '2', 'wut'];
 	UI = new UI_Controller(p5Instance);
-	var newElm = new UI_Element(UI, 200, 200, 50, 50, {
-		dragable: true,
-		clickable: true
+	var sidebar = new UI_Element(UI, windowWidth - SIDEBAR_SIZE, 0, SIDEBAR_SIZE, windowHeight);
+	sidebarData.forEach((lb, idx) => {
+		var newElm = new UI_Element(sidebar, SIDEBAR_BUFF / 2, Y_SPACER * (idx + 1), SIDE_BTN_WID, SIDE_BTN_HEI);
+		newElm.visualElement = new UI_Interactable(newElm, {
+			type: 'confirm',
+			lable: lb,
+			txt: 'Please confirm',
+			w: SIDE_BTN_WID,
+			h: SIDE_BTN_HEI,
+			onValue: v => console.log(v)
+		});
+		sidebar.spawnElement(newElm);
 	});
-	newElm.spawnElement(new UI_Element(newElm, 0, 100, 50, 50, {
-		dragable: true,
-		clickable: true
-	}));
-	newElm.spawnElement(new UI_Element(newElm, 100, 0, 50, 50, {
-		dragable: true,
-		clickable: true
-	}));
-	UI.spawnElement(newElm);
+	UI.spawnElement(sidebar);
 }
 
 function draw() {
 	background(0);
 	drawTree(windowWidth / 2, 50);
+	fill(255, 50);
+	noStroke();
+	if (textSize() != TEXT_SIZE) {
+		textSize(TEXT_SIZE);
+	}
+	rect(windowWidth - SIDEBAR_SIZE, 0, SIDEBAR_SIZE, windowHeight);
 	UI.run();
 }
 
@@ -119,6 +137,7 @@ function mouseDragged() {
 
 function mouseReleased() {
 	UI.mouseUp();
+	mouseUp = true;
 }
 // function windowResized() {}
-// function mouseWheel(e) {}
+// function mouseWheel(e) {}{}
