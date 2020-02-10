@@ -23,6 +23,7 @@ function ID() {
 
 class UI_Controller {
 	constructor(p5Insance) {
+		this.vis = true;
 		this.x = 0;
 		this.y = 0;
 		this.activeElementCanChange = true;
@@ -30,9 +31,18 @@ class UI_Controller {
 		this.draggedElement = {};
 		this.elements = [];
 		this.p5Inst = p5Instance;
+
 		if (!p5Instance) {
 			throw new Error('No p5 instance passed to UI');
 		}
+
+		//consts
+		this.TEXT_SIZE = 12;
+		this.SIDEBAR_SIZE = 150;
+		this.SIDEBAR_BUFF = 25;
+		this.SIDE_BTN_WID = this.SIDEBAR_SIZE - this.SIDEBAR_BUFF;
+		this.SIDE_BTN_HEI = this.TEXT_SIZE + 3;
+		this.Y_SPACER = this.TEXT_SIZE + 5;
 	}
 	run() {
 		this.elements.forEach(elm => elm.run());
@@ -70,6 +80,7 @@ class UI_Element {
 		this.dragable = opts.dragable || false;
 		this.clickable = opts.clickable || false;
 		this.visualElement = undefined;
+		this.vis = true;
 		this.id = ID();
 	}
 	move() {
@@ -81,7 +92,8 @@ class UI_Element {
 		if (UI.activeElement.id == this.id) {
 			stroke(255, 0, 0);
 		} else {
-			stroke(255);
+			// stroke(255);
+			noStroke();
 		}
 		rect(this.absX, this.absY, this.w, this.h);
 		if (this.visualElement && typeof this.visualElement.run == 'function') {
@@ -89,6 +101,9 @@ class UI_Element {
 		}
 	}
 	run() {
+		if (!this.vis || !this.owner.vis) {
+			return;
+		}
 		this.move();
 		this.draw();
 	}
@@ -157,5 +172,34 @@ class UI_Interactable {
 	}
 }
 class UI_Sidebar extends UI_Element {
-	constructor(data, side) {}
+	constructor(UI, side, data) {
+		var x = side == 'left' ? 0 : windowWidth - UI.SIDEBAR_SIZE;
+		super(UI, x, 0, UI.SIDEBAR_SIZE, windowHeight);
+
+		data.forEach((elemData, idx) => {
+			var newElm = new UI_Element(this, UI.SIDEBAR_BUFF / 2, UI.Y_SPACER * (idx + 1), UI.SIDE_BTN_WID, UI.SIDE_BTN_HEI);
+			newElm.visualElement = new UI_Interactable(newElm, {
+				type: elemData.type || 'confirm',
+				lable: elemData.lb || '-null-',
+				txt: elemData.txt || 'Please confirm',
+				w: UI.SIDE_BTN_WID,
+				h: UI.SIDE_BTN_HEI,
+				onValue: v => console.log(this.id + ': ' + v)
+			});
+			this.spawnElement(newElm);
+		});
+		this.side = side;
+	}
+	run() {
+		if (!this.vis || !this.owner.vis) {
+			return;
+		}
+		fill(255, 50);
+		noStroke();
+		rect(this.x, this.y, this.w, this.h);
+		this.move();
+		this.draw();
+		this.x = this.side == 'left' ? 0 : windowWidth - this.UI.SIDEBAR_SIZE;
+
+	}
 }

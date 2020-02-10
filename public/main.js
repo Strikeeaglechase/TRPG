@@ -60,7 +60,8 @@ function btn(x, y, w, h, txt, col) {
 	}
 	var needW = textWidth(txt);
 	var acW = max(w, needW + buttonSpacer);
-	fill(col || 0);
+	// fill(col || 0);
+	fill(51);
 	rect(x, y, acW, h);
 	fill(255);
 	noStroke();
@@ -89,33 +90,33 @@ function setup() {
 	p5Instance.canvas.oncontextmenu = function(e) {
 		e.preventDefault();
 	};
-	var sidebarData = ['noU', 'die', '1', '2', 'wut'];
+
 	UI = new UI_Controller(p5Instance);
-	var sidebar = new UI_Element(UI, windowWidth - SIDEBAR_SIZE, 0, SIDEBAR_SIZE, windowHeight);
-	sidebarData.forEach((lb, idx) => {
-		var newElm = new UI_Element(sidebar, SIDEBAR_BUFF / 2, Y_SPACER * (idx + 1), SIDE_BTN_WID, SIDE_BTN_HEI);
-		newElm.visualElement = new UI_Interactable(newElm, {
-			type: 'confirm',
-			lable: lb,
-			txt: 'Please confirm',
-			w: SIDE_BTN_WID,
-			h: SIDE_BTN_HEI,
-			onValue: v => console.log(v)
-		});
-		sidebar.spawnElement(newElm);
-	});
+
+	var sidebarData = [{
+		lb: 'noU'
+	}, {
+		lb: 'die'
+	}, {
+		lb: '1'
+	}, {
+		lb: '2'
+	}, {
+		lb: 'wut'
+	}];
+	var sidebar = new UI_Sidebar(UI, 'right', sidebarData)
 	UI.spawnElement(sidebar);
+
+	// var sidebar2 = new UI_Sidebar(UI, 'left', sidebarData)
+	// UI.spawnElement(sidebar2);
 }
 
 function draw() {
 	background(0);
 	drawTree(windowWidth / 2, 50);
-	fill(255, 50);
-	noStroke();
-	if (textSize() != TEXT_SIZE) {
-		textSize(TEXT_SIZE);
+	if (textSize() != UI.TEXT_SIZE) {
+		textSize(UI.TEXT_SIZE);
 	}
-	rect(windowWidth - SIDEBAR_SIZE, 0, SIDEBAR_SIZE, windowHeight);
 	UI.run();
 }
 
@@ -139,5 +140,8 @@ function mouseReleased() {
 	UI.mouseUp();
 	mouseUp = true;
 }
-// function windowResized() {}
+
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
 // function mouseWheel(e) {}{}
